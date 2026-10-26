@@ -36,7 +36,7 @@ jobs:
         run: |
           (cd ios && xcodegen generate)
           xcodebuild test -project ios/URCTrumps.xcodeproj -scheme URCTrumps \
-            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4'
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4.1'
 
       - name: Build and upload to TestFlight
         env:
