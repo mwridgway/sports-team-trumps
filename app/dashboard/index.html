@@ -1,0 +1,434 @@
+<style>
+  .urc { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); }
+  .urc-head { display: grid; gap: var(--cds-gap-xs); }
+  .urc-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .urc-take { color: var(--color-fg-muted); margin: 0; max-width: 65ch; }
+  .urc-take b { font-weight: 600; color: var(--color-fg); }
+  .urc-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--cds-gap-md); }
+  .urc-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); }
+  .urc-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .urc-tile-value { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+  .urc-tile-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .urc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+  .urc-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; container-type: inline-size; }
+  .urc-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .urc-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+  .urc-cardhead { display: grid; gap: var(--cds-gap-xs); }
+  .urc-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+  .urc-controls select, .urc-controls input { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); min-width: 0; }
+  .urc-controls input { flex: 1 1 12rem; }
+  .urc-controls :focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
+  .urc-chartbox { position: relative; min-height: 380px; }
+  .urc-legend { display: flex; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .urc-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+  .urc-legend i { width: 0.625rem; height: 0.625rem; border-radius: 2px; display: inline-block; }
+  .urc-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; white-space: nowrap; z-index: 2; }
+  .urc-tip .k { color: var(--cds-text-secondary); }
+  .urc-leaders { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-xs); min-height: 520px; align-content: start; }
+  .urc-leader { display: grid; grid-template-columns: 1.5rem 2.5rem minmax(0, 1fr) auto; gap: var(--cds-gap-sm); align-items: center; }
+  .urc-rank { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .urc-face { width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover; object-position: top; background: var(--color-bg); border: 1px solid var(--color-border-line); display: block; }
+  .urc-face.sm { width: 1.75rem; height: 1.75rem; }
+  .urc-who { min-width: 0; display: grid; gap: 2px; }
+  .urc-who .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .urc-who .m { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .urc-bar { height: 4px; border-radius: 2px; background: var(--cds-chart-muted); }
+  .urc-val { font-variant-numeric: tabular-nums; text-align: right; min-width: 3.5rem; }
+  .urc-leader:first-child .urc-val { font-weight: 600; }
+  .urc-tablebox { max-height: 34rem; overflow: auto; border-top: 1px solid var(--color-border-line); }
+  .urc-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .urc-table th { position: sticky; top: 0; background: var(--color-panel); text-align: right; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: 0; border-bottom: 1px solid var(--color-border-line); z-index: 1; }
+  .urc-table th button { all: unset; cursor: pointer; display: block; width: 100%; box-sizing: border-box; padding: var(--cds-pad-xs) var(--cds-pad-sm); white-space: nowrap; }
+  .urc-table th button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: -2px; }
+  .urc-table th[aria-sort] button { color: var(--color-fg); }
+  .urc-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); text-align: right; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .urc-table .l { text-align: left; }
+  .urc-table td.l.name { white-space: normal; min-width: 8rem; }
+  .urc-count { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  @container (max-width: 44rem) { .urc-table .opt { display: none; } }
+  .urc-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
+  .urc-fail::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="urc">
+  <header class="urc-head" id="overview">
+    <h1 class="urc-title">URC Player Pool</h1>
+    <p class="urc-take dash-skeleton" id="urc-take">—</p>
+  </header>
+
+  <section class="urc-tiles" aria-label="Headline figures">
+    <div class="urc-tile">
+      <span class="urc-tile-label">Players in current squads</span>
+      <span class="urc-tile-value dash-skeleton" data-source="summary" data-field="players">—</span>
+      <span class="urc-tile-note">2026/27 squads</span>
+    </div>
+    <div class="urc-tile">
+      <span class="urc-tile-label">Clubs</span>
+      <span class="urc-tile-value dash-skeleton" data-source="summary" data-field="clubs">—</span>
+      <span class="urc-tile-note">Ireland, Italy, Scotland, South Africa, Wales</span>
+    </div>
+    <div class="urc-tile">
+      <span class="urc-tile-label">Forwards / backs</span>
+      <span class="urc-tile-value"><span class="dash-skeleton" data-source="summary" data-field="forwards">—</span> / <span class="dash-skeleton" data-source="summary" data-field="backs">—</span></span>
+      <span class="urc-tile-note">Jerseys 1–8 / 9–15</span>
+    </div>
+    <div class="urc-tile">
+      <span class="urc-tile-label">Have played in the URC</span>
+      <span class="urc-tile-value dash-skeleton" data-source="summary" data-field="with_stats">—</span>
+      <span class="urc-tile-note">at least one appearance since 2021/22</span>
+    </div>
+  </section>
+
+  <section class="urc-grid">
+    <div class="urc-card" id="squads">
+      <div class="urc-cardhead">
+        <h2>Squad size by club</h2>
+        <p class="urc-note">Players listed in each 2026/27 squad, split by forwards and backs. Hover a bar for the squad's average age, height and weight.</p>
+      </div>
+      <div class="urc-legend" id="urc-legend"></div>
+      <div class="urc-chartbox dash-skeleton" id="urc-squad-chart" data-source="clubs"></div>
+    </div>
+
+    <div class="urc-card" id="leaders">
+      <div class="urc-cardhead">
+        <h2>Stat leaders</h2>
+        <p class="urc-note">Top 10 current players by URC total since 2021/22. Pick the stat that decides the trump.</p>
+      </div>
+      <div class="urc-controls">
+        <select id="urc-stat" aria-label="Stat"></select>
+        <select id="urc-group" aria-label="Forwards or backs">
+          <option value="">All players</option>
+          <option value="forward">Forwards</option>
+          <option value="back">Backs</option>
+        </select>
+      </div>
+      <ol class="urc-leaders dash-skeleton" id="urc-leaders" data-source="players headshots"></ol>
+    </div>
+  </section>
+
+  <section class="urc-card" id="explorer" data-source="headshots">
+    <div class="urc-cardhead">
+      <h2>Player explorer</h2>
+      <p class="urc-note">Every player in a current squad with URC totals since 2021/22. Select a column header to sort.</p>
+    </div>
+    <div class="urc-controls">
+      <input id="urc-q" type="search" placeholder="Search name or nationality" aria-label="Search players">
+      <select id="urc-club" aria-label="Club"><option value="">All clubs</option></select>
+      <select id="urc-pos" aria-label="Position"><option value="">All positions</option></select>
+      <span class="urc-count" id="urc-count"></span>
+    </div>
+    <div class="urc-tablebox">
+      <table class="urc-table" id="urc-table" data-source="players" data-row-key="player_id">
+        <thead><tr>
+          <th class="l" scope="col" aria-label="Photo"></th>
+          <th class="l" scope="col" data-field="name"><button type="button" data-sort="name">Player</button></th>
+          <th class="l" scope="col" data-field="club_short"><button type="button" data-sort="club_short">Club</button></th>
+          <th class="l" scope="col" data-field="position"><button type="button" data-sort="position">Position</button></th>
+          <th scope="col" data-field="age" class="opt"><button type="button" data-sort="age">Age</button></th>
+          <th scope="col" data-field="height_cm" class="opt"><button type="button" data-sort="height_cm">Height cm</button></th>
+          <th scope="col" data-field="weight_kg" class="opt"><button type="button" data-sort="weight_kg">Weight kg</button></th>
+          <th scope="col" data-field="appearances"><button type="button" data-sort="appearances">Apps</button></th>
+          <th scope="col" data-field="tries"><button type="button" data-sort="tries">Tries</button></th>
+          <th scope="col" data-field="metres_made"><button type="button" data-sort="metres_made">Metres</button></th>
+          <th scope="col" data-field="tackles"><button type="button" data-sort="tackles">Tackles</button></th>
+          <th scope="col" data-field="tackle_success_pct" class="opt"><button type="button" data-sort="tackle_success_pct">Tackle %</button></th>
+          <th scope="col" data-field="turnovers_won" class="opt"><button type="button" data-sort="turnovers_won">Turnovers</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Positions in jersey order, with the numbers each one wears.
+  const POSITIONS = [
+    ['prop', 'Prop', '1, 3'], ['hooker', 'Hooker', '2'], ['lock', 'Lock', '4, 5'], ['flanker', 'Flanker', '6, 7'],
+    ['no. 8', 'No. 8', '8'], ['scrum-half', 'Scrum-half', '9'], ['fly-half', 'Fly-half', '10'],
+    ['wing', 'Wing', '11, 14'], ['centre', 'Centre', '12, 13'], ['fullback', 'Fullback', '15'],
+  ];
+  const POS_ORDER = new Map(POSITIONS.map(([k], i) => [k, i]));
+  const POS_LABEL = new Map(POSITIONS.map(([k, l]) => [k, l]));
+  const STATS = [
+    ['tries', 'Tries'], ['points', 'Points'], ['metres_made', 'Metres made'], ['carries', 'Carries'],
+    ['clean_breaks', 'Clean breaks'], ['defenders_beaten', 'Defenders beaten'], ['offloads', 'Offloads'],
+    ['try_assists', 'Try assists'], ['tackles', 'Tackles'], ['turnovers_won', 'Turnovers won'],
+    ['lineouts_won', 'Lineouts won'], ['lineout_steals', 'Lineout steals'], ['kick_metres', 'Kick metres'],
+    ['penalty_goals', 'Penalty goals'], ['appearances', 'Appearances'],
+  ];
+  const fmt = d3.format(',');
+  const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v));
+  const safeImg = (s) => (typeof s === 'string' && s.startsWith('data:image/') ? s : null);
+
+  dash.calc('summary', {
+    inputs: ['players', 'headshots'],
+    title: 'Player pool summary',
+    description: 'Counts current squad players, clubs, forwards, backs and players with URC appearances, and finds the top try scorer.',
+    fn: (players, headshots) => {
+      const top = players.reduce((a, p) => (Number(p.tries) > Number(a.tries) ? p : a), players[0] || {});
+      return [{
+        players: players.length,
+        clubs: new Set(players.map((p) => p.club)).size,
+        forwards: players.filter((p) => p.position_group === 'forward').length,
+        backs: players.filter((p) => p.position_group === 'back').length,
+        with_stats: players.filter((p) => Number(p.appearances) > 0).length,
+        headshots: headshots.length,
+        top_try_name: top.name,
+        top_try_club: top.club,
+        top_tries: Number(top.tries),
+      }];
+    },
+  });
+
+  dash.calc('clubs', {
+    inputs: ['players'],
+    title: 'Squads by club',
+    description: 'Per club: squad size, forwards, backs, and average age, height and weight of players with those listed.',
+    fn: (players) => {
+      const avg = (xs) => {
+        const v = xs.filter((x) => x !== null && x !== undefined && x !== '').map(Number);
+        return v.length ? Math.round((10 * v.reduce((a, b) => a + b, 0)) / v.length) / 10 : null;
+      };
+      return d3.groups(players, (p) => p.club).map(([club, ps]) => ({
+        club,
+        club_short: ps[0].club_short,
+        players: ps.length,
+        forwards: ps.filter((p) => p.position_group === 'forward').length,
+        backs: ps.filter((p) => p.position_group === 'back').length,
+        avg_age: avg(ps.map((p) => p.age)),
+        avg_height_cm: avg(ps.map((p) => p.height_cm)),
+        avg_weight_kg: avg(ps.map((p) => p.weight_kg)),
+      }));
+    },
+  });
+
+  const state = { stat: 'tries', group: '', q: '', club: '', pos: '', sort: 'tries', dir: -1 };
+
+  // Controls
+  const statSel = document.getElementById('urc-stat');
+  statSel.replaceChildren(...STATS.map(([k, l]) => new Option(l, k)));
+  statSel.value = state.stat;
+  statSel.addEventListener('change', () => { state.stat = statSel.value; drawLeaders(); });
+  const groupSel = document.getElementById('urc-group');
+  groupSel.addEventListener('change', () => { state.group = groupSel.value; drawLeaders(); });
+  const posSel = document.getElementById('urc-pos');
+  posSel.append(...POSITIONS.map(([k, l, n]) => new Option(`${l} (${n})`, k)));
+  posSel.addEventListener('change', () => { state.pos = posSel.value; drawTable(); });
+  const clubSel = document.getElementById('urc-club');
+  clubSel.addEventListener('change', () => { state.club = clubSel.value; drawTable(); });
+  const q = document.getElementById('urc-q');
+  q.addEventListener('input', () => { state.q = q.value.trim().toLowerCase(); drawTable(); });
+  document.querySelectorAll('#urc-table th button').forEach((b) => b.addEventListener('click', () => {
+    const k = b.dataset.sort;
+    if (state.sort === k) state.dir = -state.dir;
+    else { state.sort = k; state.dir = ['name', 'club_short', 'position'].includes(k) ? 1 : -1; }
+    drawTable();
+  }));
+
+  const failLine = (el) => {
+    const d = document.createElement('div');
+    d.className = 'urc-fail';
+    d.textContent = 'Failed to load';
+    el.replaceChildren(d);
+  };
+  const headshotMap = () => {
+    const h = dash.data('headshots');
+    return new Map(h.status === 'ok' ? h.data.map((r) => [String(r.player_id), safeImg(r.img)]) : []);
+  };
+  const face = (src, cls) => {
+    const img = document.createElement('img');
+    img.className = cls;
+    img.alt = '';
+    img.loading = 'lazy';
+    if (src) img.src = src;
+    return img;
+  };
+
+  function drawSummary() {
+    const s = dash.data('summary');
+    const take = document.getElementById('urc-take');
+    document.querySelectorAll('.urc-tiles [data-source="summary"][data-field]').forEach((el) => {
+      if (s.status === 'ok' && s.data[0]) { el.textContent = fmt(s.data[0][el.dataset.field]); el.classList.remove('dash-skeleton'); }
+      else if (s.status === 'error') { el.textContent = '—'; el.classList.remove('dash-skeleton'); }
+    });
+    if (s.status !== 'ok' || !s.data[0]) return;
+    const r = s.data[0];
+    take.classList.remove('dash-skeleton');
+    const part = (field, text) => {
+      const b = document.createElement('b');
+      b.dataset.source = 'summary';
+      b.dataset.field = field;
+      b.textContent = text;
+      return b;
+    };
+    take.replaceChildren(
+      part('top_try_name', r.top_try_name), ' (', part('top_try_club', r.top_try_club), ') leads the current pool with ',
+      part('top_tries', fmt(r.top_tries)), ' URC tries since 2021/22. ',
+      part('headshots', fmt(r.headshots)), ' of ', part('players', fmt(r.players)), ' players have an official headshot.',
+    );
+  }
+
+  function drawSquads() {
+    const box = document.getElementById('urc-squad-chart');
+    const c = dash.data('clubs');
+    const legend = document.getElementById('urc-legend');
+    if (c.status === 'error') { box.classList.remove('dash-skeleton'); failLine(box); return; }
+    if (c.status !== 'ok') { box.replaceChildren(); return; }
+    box.classList.remove('dash-skeleton');
+    const colors = [dash.colors[0], dash.colors[1]];
+    legend.replaceChildren(...[['Forwards', colors[0]], ['Backs', colors[1]]].map(([l, col]) => {
+      const s = document.createElement('span');
+      const i = document.createElement('i');
+      i.style.background = col;
+      s.append(i, l);
+      return s;
+    }));
+    const rows = [...c.data].sort((a, b) => b.players - a.players || d3.ascending(a.club, b.club));
+    const width = Math.max(260, box.clientWidth);
+    const rowH = 22, gap = 0.3, top = 4;
+    const height = top + rows.length * rowH + 22;
+    const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img')
+      .attr('aria-label', 'Squad size by club');
+    // Measure the widest club label as drawn before laying out.
+    const probe = svg.append('g').style('font-size', 'var(--cds-font-size-caption)');
+    probe.selectAll('text').data(rows).join('text').text((r) => r.club);
+    box.replaceChildren(svg.node());
+    const left = Math.ceil(d3.max(probe.selectAll('text').nodes(), (n) => n.getComputedTextLength()) || 80) + 10;
+    probe.remove();
+    const right = 28;
+    const x = d3.scaleLinear([0, d3.max(rows, (r) => r.players)], [left, width - right]).nice();
+    const y = d3.scaleBand(rows.map((r) => r.club), [top, top + rows.length * rowH]).padding(gap);
+    svg.append('g').selectAll('line').data(x.ticks(5)).join('line')
+      .attr('x1', (d) => x(d)).attr('x2', (d) => x(d)).attr('y1', top).attr('y2', top + rows.length * rowH)
+      .attr('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    svg.append('g').attr('transform', `translate(0,${top + rows.length * rowH})`)
+      .call(d3.axisBottom(x).ticks(5).tickSize(0).tickPadding(6))
+      .attr('font-size', null).attr('font-family', null)
+      .call((g) => g.select('.domain').attr('stroke', 'var(--cds-chart-axis)'))
+      .call((g) => g.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)'));
+    const g = svg.append('g').selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', left - 8).attr('y', (r) => y(r.club) + y.bandwidth() / 2).attr('dy', '0.35em')
+      .attr('text-anchor', 'end').attr('fill', 'var(--color-fg)').style('font-size', 'var(--cds-font-size-caption)').text((r) => r.club);
+    g.append('rect').attr('x', x(0)).attr('y', (r) => y(r.club)).attr('height', y.bandwidth())
+      .attr('width', (r) => x(r.forwards) - x(0)).attr('fill', colors[0]).attr('rx', 2);
+    g.append('rect').attr('x', (r) => x(r.forwards)).attr('y', (r) => y(r.club)).attr('height', y.bandwidth())
+      .attr('width', (r) => x(r.players) - x(r.forwards)).attr('fill', colors[1]).attr('rx', 2);
+    g.append('text').attr('x', (r) => x(r.players) + 4).attr('y', (r) => y(r.club) + y.bandwidth() / 2).attr('dy', '0.35em')
+      .attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').style('font-variant-numeric', 'tabular-nums')
+      .text((r) => r.players);
+    const tip = document.createElement('div');
+    tip.className = 'urc-tip';
+    tip.hidden = true;
+    g.append('rect').attr('x', 0).attr('width', width).attr('y', (r) => y(r.club) - (y.step() * gap) / 2).attr('height', y.step())
+      .attr('fill', 'transparent')
+      .on('mousemove', (event, r) => {
+        const one = (k, v) => { const d = document.createElement('div'); const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' '; d.append(s, v); return d; };
+        const head = document.createElement('div');
+        head.className = 'k';
+        head.textContent = r.club;
+        tip.replaceChildren(head, one('Forwards', fmt(r.forwards)), one('Backs', fmt(r.backs)),
+          one('Avg age', r.avg_age ?? '–'), one('Avg height', r.avg_height_cm == null ? '–' : r.avg_height_cm + ' cm'),
+          one('Avg weight', r.avg_weight_kg == null ? '–' : r.avg_weight_kg + ' kg'));
+        tip.hidden = false;
+        const [mx, my] = d3.pointer(event, box);
+        const tw = tip.offsetWidth;
+        tip.style.left = Math.min(Math.max(0, mx + 12), box.clientWidth - tw) + 'px';
+        tip.style.top = (my + 12) + 'px';
+      })
+      .on('mouseleave', () => { tip.hidden = true; });
+    box.replaceChildren(svg.node(), tip);
+  }
+
+  function drawLeaders() {
+    const list = document.getElementById('urc-leaders');
+    const p = dash.data('players');
+    if (p.status === 'error') { list.classList.remove('dash-skeleton'); failLine(list); return; }
+    if (p.status !== 'ok') { list.replaceChildren(); return; }
+    list.classList.remove('dash-skeleton');
+    const faces = headshotMap();
+    const k = state.stat;
+    const top = p.data.filter((r) => !state.group || r.position_group === state.group)
+      .filter((r) => num(r[k]) > 0)
+      .sort((a, b) => num(b[k]) - num(a[k]) || d3.ascending(a.name, b.name)).slice(0, 10);
+    const max = top.length ? num(top[0][k]) : 1;
+    list.replaceChildren(...top.map((r, i) => {
+      const li = document.createElement('li');
+      li.className = 'urc-leader';
+      const rank = document.createElement('span');
+      rank.className = 'urc-rank';
+      rank.textContent = i + 1;
+      const who = document.createElement('div');
+      who.className = 'urc-who';
+      const n = document.createElement('span');
+      n.className = 'n';
+      n.textContent = r.name;
+      const m = document.createElement('span');
+      m.className = 'm';
+      m.textContent = `${r.club} · ${POS_LABEL.get(r.position) ?? r.position ?? ''}`;
+      const bar = document.createElement('div');
+      bar.className = 'urc-bar';
+      bar.style.width = `${(100 * num(r[k])) / max}%`;
+      if (i === 0) bar.style.background = dash.colors[0];
+      who.append(n, m, bar);
+      const v = document.createElement('span');
+      v.className = 'urc-val';
+      v.textContent = fmt(num(r[k]));
+      li.append(rank, face(faces.get(String(r.player_id)), 'urc-face'), who, v);
+      return li;
+    }));
+  }
+
+  function drawTable() {
+    const table = document.getElementById('urc-table');
+    const body = table.tBodies[0];
+    const p = dash.data('players');
+    const count = document.getElementById('urc-count');
+    if (p.status !== 'ok') { body.replaceChildren(); count.textContent = p.status === 'error' ? 'Failed to load' : ''; return; }
+    const clubs = [...new Set(p.data.map((r) => r.club))].sort(d3.ascending);
+    if (clubSel.options.length !== clubs.length + 1) {
+      clubSel.replaceChildren(new Option('All clubs', ''), ...clubs.map((c) => new Option(c, c)));
+      clubSel.value = state.club;
+    }
+    const faces = headshotMap();
+    const rows = p.data.filter((r) => (!state.club || r.club === state.club) && (!state.pos || r.position === state.pos)
+      && (!state.q || `${r.name} ${r.national_team ?? ''}`.toLowerCase().includes(state.q)));
+    const k = state.sort;
+    const val = (r) => (k === 'position' ? POS_ORDER.get(r.position) ?? 99 : r[k]);
+    rows.sort((a, b) => {
+      const x = val(a), y = val(b);
+      if (x == null && y == null) return d3.ascending(a.name, b.name);
+      if (x == null) return 1;
+      if (y == null) return -1;
+      const c = typeof x === 'number' || typeof y === 'number' ? Number(x) - Number(y) : String(x).localeCompare(String(y));
+      return c * state.dir || d3.ascending(a.name, b.name);
+    });
+    table.querySelectorAll('th[data-field]').forEach((th) => {
+      if (th.dataset.field === k) th.setAttribute('aria-sort', state.dir > 0 ? 'ascending' : 'descending');
+      else th.removeAttribute('aria-sort');
+    });
+    const cell = (text, cls) => { const td = document.createElement('td'); if (cls) td.className = cls; td.textContent = text; return td; };
+    const n = (v) => (num(v) == null ? '' : fmt(num(v)));
+    body.replaceChildren(...rows.map((r) => {
+      const tr = document.createElement('tr');
+      tr.dataset.key = String(r.player_id);
+      const ph = document.createElement('td');
+      ph.className = 'l';
+      ph.append(face(faces.get(String(r.player_id)), 'urc-face sm'));
+      tr.append(ph, cell(r.name, 'l name'), cell(r.club_short, 'l'), cell(r.position ?? '', 'l'),
+        cell(n(r.age), 'opt'), cell(n(r.height_cm), 'opt'), cell(n(r.weight_kg), 'opt'),
+        cell(n(r.appearances)), cell(n(r.tries)), cell(n(r.metres_made)), cell(n(r.tackles)),
+        cell(r.tackle_success_pct == null ? '' : Number(r.tackle_success_pct).toFixed(1), 'opt'), cell(n(r.turnovers_won), 'opt'));
+      return tr;
+    }));
+    count.textContent = `${fmt(rows.length)} of ${fmt(p.data.length)} players`;
+  }
+
+  dash.onData(() => {
+    drawSummary();
+    drawSquads();
+    drawLeaders();
+    drawTable();
+  });
+</script>

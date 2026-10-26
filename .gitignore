@@ -1,1 +1,10 @@
 data/
+ios/URCTrumps.xcodeproj/
+ios/build/
+ios/URCTrumps/Resources/GameData/
+xcuserdata/
+.DS_Store
+.vercel
+.env*
+node_modules/
+__pycache__/

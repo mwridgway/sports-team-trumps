@@ -1,0 +1,348 @@
+<title>URC Trumps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+  /* Layout: a floodlit pitch at night; the cards are the only bright objects, the scoreboard amber is the one accent. */
+  :root {
+    --pitch: #0d1a14;
+    --pitch-2: #13251c;
+    --chalk: #e9efe9;
+    --chalk-dim: #9fb3a6;
+    --line: #2b4436;
+    --card: #f5f7f4;
+    --ink: #121815;
+    --ink-dim: #5d6a62;
+    --amber: #f2b134;
+    --amber-ink: #3a2700;
+    --loss: #8a958e;
+    --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+    --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+    --font-data: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--pitch);
+    background-image: repeating-linear-gradient(90deg, var(--pitch) 0 72px, var(--pitch-2) 72px 144px);
+    color: var(--chalk);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 1080px; margin-inline: auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--line); padding-bottom: 16px; }
+  .brand { display: grid; gap: 4px; }
+  .brand h1 { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 7vw, 3.6rem); line-height: .9; letter-spacing: .01em; text-transform: uppercase; }
+  .brand h1 span { color: var(--amber); }
+  .brand p { margin: 0; color: var(--chalk-dim); max-width: 60ch; }
+  .tabs { display: flex; gap: 4px; background: var(--pitch-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+  .tabs button { font: 600 .9rem var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--chalk-dim); background: none; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--chalk); color: var(--ink); }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  /* Scoreboard */
+  .board { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; font-family: var(--font-data); }
+  .side { display: grid; gap: 2px; }
+  .side.cpu { text-align: right; }
+  .side .who { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--chalk-dim); }
+  .side .n { font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ruck { text-align: center; display: grid; gap: 2px; padding: 6px 14px; border: 1px dashed var(--line); border-radius: 10px; }
+  .ruck .who { font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--chalk-dim); }
+  .ruck .n { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .status { min-height: 3.2em; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; background: var(--pitch-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  .status p { margin: 0; font-weight: 500; }
+  .status p b { color: var(--amber); font-weight: 600; }
+  .actions { display: flex; gap: 8px; }
+  .btn { font: 700 .95rem var(--font-data); letter-spacing: .08em; text-transform: uppercase; border-radius: 8px; padding: 10px 18px; cursor: pointer; border: 2px solid var(--amber); }
+  .btn.primary { background: var(--amber); color: var(--amber-ink); }
+  .btn.ghost { background: transparent; color: var(--chalk); border-color: var(--line); }
+
+  .table { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(10px, 3vw, 40px); max-width: 760px; margin-inline: auto; width: 100%; }
+  .slot { display: grid; gap: 8px; min-width: 0; }
+  .slot .label { font: 600 .8rem var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--chalk-dim); text-align: center; }
+
+  /* The card. Sized by its own width so it reads the same in a phone slot or the pack grid. */
+  .card { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 5 / 8; max-width: 100%; border-radius: 16px; background: var(--card); color: var(--ink); overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06); display: grid; grid-template-rows: auto 1fr auto auto; transition: transform .35s ease, filter .35s ease; }
+  .card .top { display: flex; justify-content: space-between; align-items: center; padding: 3.5cqi 5cqi; background: var(--club); color: #fff; font: 700 5cqi/1 var(--font-data); letter-spacing: .1em; text-transform: uppercase; }
+  .card .top .num { font-family: var(--font-display); font-weight: 800; font-size: 6cqi; letter-spacing: .02em; }
+  .card .photo { position: relative; min-height: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--club) 22%, var(--card)), var(--card)); overflow: hidden; }
+  .card .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 12%; }
+  .card .photo .club { position: absolute; left: 4cqi; bottom: 3cqi; font: 600 3.8cqi var(--font-data); letter-spacing: .06em; text-transform: uppercase; background: var(--card); color: var(--ink); padding: .8cqi 2.2cqi; border-radius: 1.5cqi; }
+  .card .name { padding: 2.5cqi 5cqi 1.5cqi; display: grid; border-top: 1cqi solid var(--club); }
+  .card .name .first { font: 600 4.2cqi/1.1 var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-dim); }
+  .card .name .last { font: 900 9.5cqi/0.95 var(--font-display); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .stats { display: grid; padding: 0 3cqi 3cqi; gap: .6cqi; }
+  .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 2cqi; width: 100%; font: 600 5cqi/1.25 var(--font-data); color: var(--ink); background: none; border: 0; border-bottom: 1px solid #dfe5e0; border-radius: 1.5cqi; padding: 1cqi 2cqi; text-align: left; }
+  .stat .k { letter-spacing: .04em; text-transform: uppercase; color: var(--ink-dim); font-weight: 500; }
+  .stat .v { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .stat .v small { font-size: .7em; color: var(--ink-dim); font-weight: 500; margin-left: .3em; }
+  button.stat { cursor: pointer; }
+  button.stat:hover { background: #e7ece8; }
+  button.stat:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+  .stat.picked { background: var(--amber); border-color: transparent; }
+  .stat.picked .k { color: var(--amber-ink); }
+  .stat.lost { background: #e3e7e4; }
+  .stat.lost .v { color: var(--loss); text-decoration: line-through; }
+  .card .foot { padding: 2cqi 5cqi 3cqi; font: 500 3.4cqi var(--font-data); letter-spacing: .04em; color: var(--ink-dim); display: flex; justify-content: space-between; gap: 2cqi; }
+  .card.won { transform: translateY(-4px); box-shadow: 0 0 0 3px var(--amber), 0 14px 34px rgba(0, 0, 0, .5); }
+  .card.beaten { filter: saturate(.35) brightness(.85); }
+
+  .back { container-type: inline-size; width: 100%; aspect-ratio: 5 / 8; border-radius: 16px; background: repeating-linear-gradient(135deg, var(--pitch-2) 0 22px, var(--line) 22px 26px), var(--pitch-2); border: 6px solid var(--chalk); display: grid; place-items: center; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+  .back span { font: 900 12cqi/0.9 var(--font-display); text-transform: uppercase; color: var(--chalk); text-align: center; background: var(--pitch); padding: 3cqi 5cqi; border: .8cqi solid var(--amber); }
+  .back span em { display: block; font-style: normal; color: var(--amber); font-size: 6cqi; letter-spacing: .2em; }
+  .empty { width: 100%; aspect-ratio: 5 / 8; border-radius: 16px; border: 2px dashed var(--line); display: grid; place-items: center; color: var(--chalk-dim); font: 600 .9rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 12px; }
+
+  /* Pack view */
+  .packbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+  .packbar p { margin: 0; color: var(--chalk-dim); max-width: 62ch; }
+  .packbar label { font: 600 .85rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--chalk-dim); display: flex; align-items: center; gap: 8px; }
+  select { font: 600 .95rem var(--font-data); color: var(--chalk); background: var(--pitch-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 20px; }
+  .grid figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+  .grid figcaption { font: 600 .8rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--chalk-dim); text-align: center; }
+  .grid figcaption b { color: var(--amber); }
+  .note { color: var(--chalk-dim); font-size: .85rem; margin: 0; max-width: 72ch; }
+
+  @media (max-width: 520px) {
+    .side .n { font-size: 2rem; }
+    .status { flex-direction: column; align-items: stretch; }
+    .actions .btn { flex: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>URC <span>Trumps</span></h1>
+      <p>Pack 1 · 32 cards from 14 clubs. Every card carries the same six categories, from official URC stats since 2021/22. Highest number wins.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button type="button" role="tab" id="tab-play" aria-selected="true" aria-controls="view-play">Play</button>
+      <button type="button" role="tab" id="tab-pack" aria-selected="false" aria-controls="view-pack">The pack</button>
+    </div>
+  </header>
+
+  <section id="view-play" role="tabpanel" aria-labelledby="tab-play" style="display:grid;gap:20px">
+    <div class="board" aria-live="polite">
+      <div class="side"><span class="who">You</span><span class="n" id="n-you">16</span></div>
+      <div class="ruck"><span class="who">Ruck</span><span class="n" id="n-ruck">0</span></div>
+      <div class="side cpu"><span class="who">Computer</span><span class="n" id="n-cpu">16</span></div>
+    </div>
+    <div class="status">
+      <p id="msg">Your card is face up. Pick the category you think beats the computer's card.</p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="next" hidden>Next card</button>
+        <button type="button" class="btn ghost" id="restart">New game</button>
+      </div>
+    </div>
+    <div class="table">
+      <div class="slot"><span class="label">Your card</span><div id="slot-you"></div></div>
+      <div class="slot"><span class="label">Computer's card</span><div id="slot-cpu"></div></div>
+    </div>
+    <p class="note">How it plays: whoever won the last hand picks the category. Win the hand and you take both cards. A draw sends both cards into the ruck, and the next hand's winner takes the lot. Take all 32 to win.</p>
+  </section>
+
+  <section id="view-pack" role="tabpanel" aria-labelledby="tab-pack" hidden style="display:grid;gap:20px">
+    <div class="packbar">
+      <p>Four props, three hookers, four locks, four flankers, two no. 8s, three scrum-halves, three fly-halves, three centres, four wings and two fullbacks. Each player earned their place with at least 10 URC appearances.</p>
+      <label for="sort">Sort by <select id="sort"></select></label>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<script>
+  const CARDS = __CARDS__;
+  const CLUB_COLORS = {
+    LEI: '#1d4f9e', MUN: '#b11226', ULS: '#9e1b32', CON: '#00703c', GLA: '#1c2b48', EDI: '#7a1f3d',
+    SCA: '#a3122a', OSP: '#24272b', DRA: '#b8341f', CAR: '#1f6fa6', BEN: '#0b6b3a', ZEB: '#3b3d45',
+    BUL: '#1f4691', STO: '#2a7fc2', SHA: '#141414', LIO: '#d41f2a',
+  };
+  const JERSEY = { prop: '1·3', hooker: '2', lock: '4·5', flanker: '6·7', 'no. 8': '8', 'scrum-half': '9', 'fly-half': '10', centre: '12·13', wing: '11·14', fullback: '15' };
+  const STATS = [
+    { k: 'height_cm', label: 'Height', unit: 'cm' },
+    { k: 'weight_kg', label: 'Weight', unit: 'kg' },
+    { k: 'tackles', label: 'Tackles' },
+    { k: 'tries', label: 'Tries' },
+    { k: 'metres_made', label: 'Metres made', unit: 'm' },
+    { k: 'points', label: 'Points' },
+  ];
+  const fmt = new Intl.NumberFormat('en');
+  const byId = new Map(CARDS.map((c) => [c.id, c]));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Each card's percentile per category within the pack: the computer picks its strongest.
+  const rank = {};
+  for (const s of STATS) {
+    const vals = CARDS.map((c) => c.stats[s.k]).sort((a, b) => a - b);
+    for (const c of CARDS) (rank[c.id] ||= {})[s.k] = vals.filter((v) => v < c.stats[s.k]).length / (vals.length - 1);
+  }
+
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  function cardEl(c, opts = {}) {
+    const card = el('article', 'card');
+    card.style.setProperty('--club', CLUB_COLORS[c.club_short] || '#333');
+    card.setAttribute('aria-label', `${c.name}, ${c.position}, ${c.club}`);
+    const top = el('div', 'top');
+    top.append(el('span', null, c.position), el('span', 'num', JERSEY[c.position] || ''));
+    const photo = el('div', 'photo');
+    const img = el('img');
+    img.src = c.img;
+    img.alt = '';
+    photo.append(img, el('span', 'club', c.club));
+    const name = el('div', 'name');
+    name.append(el('span', 'first', c.first), el('span', 'last', c.last));
+    const stats = el('div', 'stats');
+    for (const s of STATS) {
+      const row = el(opts.choose ? 'button' : 'div', 'stat');
+      if (opts.choose) { row.type = 'button'; row.addEventListener('click', () => opts.choose(s.k)); row.setAttribute('aria-label', `Play ${s.label}: ${fmt.format(c.stats[s.k])}`); }
+      if (opts.picked === s.k) row.classList.add(opts.outcome === 'lost' ? 'lost' : 'picked');
+      const v = el('span', 'v', fmt.format(c.stats[s.k]));
+      if (s.unit) v.append(el('small', null, s.unit));
+      row.append(el('span', 'k', s.label), v);
+      stats.append(row);
+    }
+    const foot = el('div', 'foot');
+    foot.append(el('span', null, `${fmt.format(c.apps)} URC apps`), el('span', null, c.nation || ''));
+    card.append(top, photo, name, stats, foot);
+    if (opts.outcome === 'won') card.classList.add('won');
+    if (opts.outcome === 'lost') card.classList.add('beaten');
+    return card;
+  }
+
+  function backEl() {
+    const b = el('div', 'back');
+    const s = el('span', null, 'URC');
+    s.append(el('em', null, 'Trumps'));
+    b.append(s);
+    b.setAttribute('aria-label', 'Face-down card');
+    return b;
+  }
+
+  // ---- Game ----
+  let g;
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  function newGame() {
+    const deck = shuffle(CARDS.map((c) => c.id));
+    g = { you: deck.filter((_, i) => i % 2 === 0), cpu: deck.filter((_, i) => i % 2 === 1), ruck: [], turn: 'you', phase: 'choose', stat: null, winner: null };
+    render();
+  }
+
+  function play(k) {
+    if (g.phase !== 'choose') return;
+    const a = byId.get(g.you[0]).stats[k], b = byId.get(g.cpu[0]).stats[k];
+    g.stat = k;
+    g.winner = a > b ? 'you' : b > a ? 'cpu' : 'draw';
+    g.phase = 'reveal';
+    render();
+  }
+
+  function cpuChoose() {
+    const top = g.cpu[0];
+    const best = STATS.reduce((m, s) => (rank[top][s.k] > rank[top][m.k] ? s : m), STATS[0]);
+    play(best.k);
+  }
+
+  function next() {
+    if (g.phase !== 'reveal') return;
+    const pot = [g.you.shift(), g.cpu.shift()];
+    if (g.winner === 'draw') g.ruck.push(...pot);
+    else { g[g.winner].push(...shuffle(pot), ...g.ruck); g.ruck = []; g.turn = g.winner; }
+    g.stat = null; g.winner = null;
+    if (!g.you.length || !g.cpu.length) { g.phase = 'over'; render(); return; }
+    g.phase = 'choose';
+    render();
+    if (g.turn === 'cpu') setTimeout(cpuChoose, reduceMotion ? 0 : 700);
+  }
+
+  function render() {
+    document.getElementById('n-you').textContent = g.you.length;
+    document.getElementById('n-cpu').textContent = g.cpu.length;
+    document.getElementById('n-ruck').textContent = g.ruck.length;
+    const slotYou = document.getElementById('slot-you');
+    const slotCpu = document.getElementById('slot-cpu');
+    const msg = document.getElementById('msg');
+    const nextBtn = document.getElementById('next');
+    nextBtn.hidden = g.phase !== 'reveal';
+
+    if (g.phase === 'over') {
+      const youWon = g.you.length > 0;
+      slotYou.replaceChildren(g.you.length ? backEl() : el('div', 'empty', 'Out of cards'));
+      slotCpu.replaceChildren(g.cpu.length ? backEl() : el('div', 'empty', 'Out of cards'));
+      msg.replaceChildren(el('b', null, youWon ? 'Full time. You win.' : 'Full time. The computer wins.'), ' Start a new game to deal again.');
+      return;
+    }
+
+    const you = byId.get(g.you[0]);
+    const cpu = byId.get(g.cpu[0]);
+    if (g.phase === 'choose') {
+      slotYou.replaceChildren(cardEl(you, { choose: g.turn === 'you' ? play : null }));
+      slotCpu.replaceChildren(backEl());
+      msg.replaceChildren(g.turn === 'you'
+        ? 'Your call. Pick the category on your card you think wins.'
+        : 'The computer won the last hand, so it picks the category…');
+      return;
+    }
+
+    const s = STATS.find((x) => x.k === g.stat);
+    const outcome = (side) => (g.winner === 'draw' ? 'draw' : g.winner === side ? 'won' : 'lost');
+    slotYou.replaceChildren(cardEl(you, { picked: g.stat, outcome: outcome('you') }));
+    slotCpu.replaceChildren(cardEl(cpu, { picked: g.stat, outcome: outcome('cpu') }));
+    const v = (c) => fmt.format(c.stats[g.stat]) + (s.unit ? ' ' + s.unit : '');
+    const picker = g.turn === 'you' ? 'You picked' : 'The computer picked';
+    const line = g.winner === 'draw'
+      ? `Both on ${v(you)}. A draw: both cards go into the ruck.`
+      : g.winner === 'you'
+        ? `${you.last} ${v(you)} beats ${cpu.last} ${v(cpu)}. You take the cards${g.ruck.length ? ' and the ruck' : ''}.`
+        : `${cpu.last} ${v(cpu)} beats ${you.last} ${v(you)}. The computer takes the cards${g.ruck.length ? ' and the ruck' : ''}.`;
+    msg.replaceChildren(`${picker} `, el('b', null, s.label), `. ${line}`);
+    nextBtn.focus({ preventScroll: true });
+  }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('restart').addEventListener('click', newGame);
+
+  // ---- Pack view ----
+  const sortSel = document.getElementById('sort');
+  sortSel.append(new Option('Position (1 to 15)', 'position'), ...STATS.map((s) => new Option(s.label, s.k)));
+  const POS_ORDER = ['prop', 'hooker', 'lock', 'flanker', 'no. 8', 'scrum-half', 'fly-half', 'centre', 'wing', 'fullback'];
+  function renderPack() {
+    const k = sortSel.value;
+    const s = STATS.find((x) => x.k === k);
+    const list = [...CARDS].sort((a, b) => (k === 'position'
+      ? POS_ORDER.indexOf(a.position) - POS_ORDER.indexOf(b.position) || a.last.localeCompare(b.last)
+      : b.stats[k] - a.stats[k] || a.last.localeCompare(b.last)));
+    document.getElementById('grid').replaceChildren(...list.map((c, i) => {
+      const f = el('figure');
+      const cap = el('figcaption');
+      if (s) cap.append(el('b', null, `#${i + 1}`), ` for ${s.label.toLowerCase()}`);
+      else cap.textContent = c.club;
+      f.append(cardEl(c, { picked: s ? k : null }), cap);
+      return f;
+    }));
+  }
+  sortSel.addEventListener('change', renderPack);
+
+  // ---- Tabs ----
+  const tabs = { play: document.getElementById('tab-play'), pack: document.getElementById('tab-pack') };
+  function show(name) {
+    for (const [n, t] of Object.entries(tabs)) {
+      t.setAttribute('aria-selected', String(n === name));
+      document.getElementById('view-' + n).hidden = n !== name;
+    }
+    if (name === 'pack' && !document.getElementById('grid').children.length) renderPack();
+  }
+  tabs.play.addEventListener('click', () => show('play'));
+  tabs.pack.addEventListener('click', () => show('pack'));
+
+  function start(saved) {
+    if (saved && saved.g) { g = saved.g; render(); if (g.phase === 'choose' && g.turn === 'cpu') setTimeout(cpuChoose, 400); }
+    else newGame();
+    show(saved && saved.tab === 'pack' ? 'pack' : location.hash === '#pack' ? 'pack' : 'play');
+  }
+  window.claude?.hot?.snapshot?.(() => ({ g, tab: tabs.pack.getAttribute('aria-selected') === 'true' ? 'pack' : 'play' }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>

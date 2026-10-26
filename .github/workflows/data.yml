@@ -1,0 +1,37 @@
+name: URC data
+
+on:
+  schedule:
+    # Daily at 03:00 UTC, plus every 3 hours on Fri–Sun when URC rounds are played.
+    - cron: "0 3 * * *"
+    - cron: "30 */3 * * 5,6,0"
+  workflow_dispatch:
+
+concurrency:
+  group: urc-data
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # macOS for `sips`, which the exporter uses to resize headshots.
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Ingest URC players, stats and headshots
+        run: python3 -u scripts/ingest_urc.py
+
+      - name: Export game data
+        run: python3 -u scripts/export_app_data.py
+
+      - name: Publish to Vercel Blob
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          npm ci --prefix scripts/blob
+          node scripts/blob/publish.mjs
