@@ -1,0 +1,49 @@
+name: TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - "scripts/**"
+      - ".github/workflows/testflight.yml"
+  schedule:
+    # Mondays 04:00 UTC (06:00 SAST): ship a build with the weekend's stats bundled.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Pull game data from Vercel Blob
+        run: python3 -u scripts/pull_app_data.py
+
+      - name: Unit tests
+        run: |
+          (cd ios && xcodegen generate)
+          xcodebuild test -project ios/URCTrumps.xcodeproj -scheme URCTrumps \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4'
+
+      - name: Build and upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          export ASC_KEY_PATH="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          printf '%s' "$ASC_KEY_P8" > "$ASC_KEY_PATH"
+          scripts/ios_release.sh
