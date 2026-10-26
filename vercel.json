@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "web",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- web/ vercel.json",
+  "headers": [
+    {
+      "source": "/(img|fonts)/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    }
+  ]
+}

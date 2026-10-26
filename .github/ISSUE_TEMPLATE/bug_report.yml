@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a problem with URC Trumps
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Tell us what you saw and what you expected to see.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a game
+        2. ...
+  - type: input
+    id: build
+    attributes:
+      label: App build number
+      placeholder: "Settings → … or TestFlight shows e.g. 1.0 (202610260659)"
+  - type: input
+    id: device
+    attributes:
+      label: iPhone model and iOS version
+      placeholder: "iPhone 16 Pro, iOS 26.4"
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag and drop a screenshot here.
