@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Debug-only launch arguments to jump straight to a screen:
 /// `-scenario home|turn|leader|cpupick|reveal|result|browse|file|career|profile`, `-seed N`.
+/// Games open with the How to play sheet until it has been seen once; pass `-hasSeenHowToPlay YES`
+/// to skip it, or `-hasSeenHowToPlay NO` to show it again.
 struct DebugScenario {
     struct File: Identifiable {
         let player: Player

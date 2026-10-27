@@ -10,6 +10,7 @@ struct RevealView: View {
     let onFiles: ([Player]) -> Void
     let onNext: () -> Void
     let onEndGame: () -> Void
+    let onRules: () -> Void
     let onQuit: () -> Void
 
     @State private var faceUp = false
@@ -30,7 +31,7 @@ struct RevealView: View {
         .background(Color.pitch.ignoresSafeArea())
         .overlay { banner.scaleEffect(faceUp ? 1 : 0.8).opacity(faceUp ? 1 : 0) }
         .overlay(alignment: .top) {
-            ScoreHUD(game: game, onEndGame: onEndGame, onQuit: onQuit)
+            ScoreHUD(game: game, onEndGame: onEndGame, onRules: onRules, onQuit: onQuit)
                 .padding(.horizontal, 12)
                 .padding(.top, 4)
         }

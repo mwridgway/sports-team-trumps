@@ -9,6 +9,7 @@ struct TurnView: View {
     let onPick: (Category) -> Void
     let onFile: (Player) -> Void
     let onEndGame: () -> Void
+    let onRules: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -42,7 +43,7 @@ struct TurnView: View {
             .frame(minHeight: 220, maxHeight: .infinity)
             .background { PhotoWithScrims(player: card) }
             .overlay(alignment: .top) {
-                ScoreHUD(game: game, userToPick: cpuPick == nil, onEndGame: onEndGame, onQuit: onQuit)
+                ScoreHUD(game: game, userToPick: cpuPick == nil, onEndGame: onEndGame, onRules: onRules, onQuit: onQuit)
                 .padding(.horizontal, 12)
                 .padding(.top, 4)
             }

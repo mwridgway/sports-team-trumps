@@ -5,6 +5,7 @@ struct ScoreHUD: View {
     let game: Game
     var userToPick = false
     let onEndGame: () -> Void
+    let onRules: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -12,6 +13,7 @@ struct ScoreHUD: View {
             HStack(spacing: 8) {
                 Menu {
                     Button("End game", systemImage: "flag.checkered", role: .destructive, action: onEndGame)
+                    Button("How to play", systemImage: "questionmark.circle", action: onRules)
                     Button("Quit to home", systemImage: "house", action: onQuit)
                 } label: {
                     Image(systemName: "pause.fill")

@@ -10,6 +10,8 @@ struct GameView: View {
     @State private var filePlayer: Player?
     @State private var choices: [Player] = []
     @State private var isChoosing = false
+    @State private var showsRules = false
+    @AppStorage("hasSeenHowToPlay") private var hasSeenHowToPlay = false
 
     var body: some View {
         ZStack {
@@ -18,7 +20,8 @@ struct GameView: View {
                 turn(cpuPick: nil)
             case .cpuPicking(let category):
                 turn(cpuPick: category)
-                    .task(id: model.game.hands.count) {
+                    .task(id: CPUPickKey(hand: model.game.hands.count, paused: showsRules)) {
+                        guard !showsRules else { return }
                         try? await Task.sleep(for: .seconds(1.6))
                         guard !Task.isCancelled else { return }
                         withAnimation(.snappy) { model.playCPUPick(category) }
@@ -27,7 +30,7 @@ struct GameView: View {
                 RevealView(
                     game: model.game, record: record, library: library,
                     onFiles: openFiles, onNext: { withAnimation(.snappy) { model.next() } },
-                    onEndGame: endGame, onQuit: onHome
+                    onEndGame: endGame, onRules: { showsRules = true }, onQuit: onHome
                 )
             case .over:
                 ResultView(
@@ -40,6 +43,8 @@ struct GameView: View {
         .toolbarVisibility(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden()
         .sheet(item: $filePlayer) { PlayerFileSheet(player: $0, library: library) }
+        .sheet(isPresented: $showsRules, onDismiss: { hasSeenHowToPlay = true }) { HowToPlaySheet() }
+        .onAppear { if !hasSeenHowToPlay { showsRules = true } }
         .confirmationDialog("Which player file?", isPresented: $isChoosing, titleVisibility: .visible) {
             ForEach(choices) { player in
                 Button(player.fullName) { filePlayer = player }
@@ -51,7 +56,7 @@ struct GameView: View {
         TurnView(
             game: model.game, library: library, cpuPick: cpuPick,
             onPick: { category in withAnimation(.snappy) { model.pick(category) } },
-            onFile: { filePlayer = $0 }, onEndGame: endGame, onQuit: onHome
+            onFile: { filePlayer = $0 }, onEndGame: endGame, onRules: { showsRules = true }, onQuit: onHome
         )
         .transition(.opacity)
     }
@@ -62,4 +67,10 @@ struct GameView: View {
     }
 
     private func endGame() { withAnimation(.snappy) { model.endGame() } }
+}
+
+/// Restarts the computer's pick delay on each new hand, and holds it while the rules are open.
+private struct CPUPickKey: Equatable {
+    let hand: Int
+    let paused: Bool
 }
